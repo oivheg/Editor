@@ -1,13 +1,9 @@
 package Editor;
 
+import Game.InitGame;
 import com.jme3.app.SimpleApplication;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.shape.Box;
 import de.lessvoid.nifty.Nifty;
 
 /**
@@ -23,14 +19,17 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        Box b = new Box(Vector3f.ZERO, 1, 1, 1);
-        Geometry geom = new Geometry("Box", b);
-
-        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", ColorRGBA.Blue);
-        geom.setMaterial(mat);
-
-        rootNode.attachChild(geom);
+        
+        
+        
+//        Box b = new Box(Vector3f.ZERO, 1, 1, 1);
+//        Geometry geom = new Geometry("Box", b);
+//
+//        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+//        mat.setColor("Color", ColorRGBA.Blue);
+//        geom.setMaterial(mat);
+//
+//        rootNode.attachChild(geom);
         
         NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(
     assetManager, inputManager, audioRenderer, guiViewPort);
@@ -43,7 +42,11 @@ nifty.fromXml("Interface/screen.xml", "start");
 guiViewPort.addProcessor(niftyDisplay);
 // disable the fly cam
 flyCam.setDragToRotate(true);
-        
+
+InitGame game = new InitGame();
+game.simpleInitApp();
+
+       rootNode.attachChild(game.getRootNode());
         
     }
 
