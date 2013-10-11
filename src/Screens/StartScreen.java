@@ -22,6 +22,7 @@ public class StartScreen  extends AbstractAppState implements ScreenController {
     private Nifty nifty;
   private Screen screen;
   private SimpleApplication app;
+  
  
     
     /** Nifty GUI ScreenControl methods */ 
@@ -29,8 +30,11 @@ public class StartScreen  extends AbstractAppState implements ScreenController {
         this.nifty = nifty;
     this.screen = screen;
     
+    
     }
 
+  
+    
     
     public void onStartScreen() {
        // throw new UnsupportedOperationException("Not supported yet.");
