@@ -48,6 +48,7 @@ public class Main extends SimpleApplication {
     assetManager, inputManager, audioRenderer, guiViewPort);
 /** Create a new NiftyGUI object */
  nifty = niftyDisplay.getNifty();
+
 /** Read your XML and initialize your custom ScreenController */
 nifty.fromXml("Interface/screen.xml", "start");
 // nifty.fromXml("Interface/helloworld.xml", "start", new MySettingsScreen(data));
@@ -87,11 +88,9 @@ rootNode.attachChild(game.getRoot());
       // find old text
 Element niftyElement = nifty.getCurrentScreen().findElementByName("name");
 
-
 // swap old with new text
 if (niftyElement != null) {
 niftyElement.getRenderer(TextRenderer.class).setText(game.GetName());
-
 
 }        
 }  
