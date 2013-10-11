@@ -7,6 +7,8 @@ package Screens;
 import Editor.Main;
 import com.jme3.app.state.AbstractAppState;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.controls.textfield.TextFieldControl;
+import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
@@ -24,9 +26,26 @@ public class Hud extends AbstractAppState implements ScreenController {
     public void bind(Nifty nifty, Screen screen) {
        this.nifty = nifty;
     this.screen = screen;
+   
+       
+      
     
     }
 
+    public void test(){
+       Element field = nifty.getCurrentScreen().findElementByName("x");
+       
+       
+        if (field.isIgnoreKeyboardEvents()) {
+           field.setIgnoreKeyboardEvents(false);
+           field.setFocus();
+           
+       }else {
+            field.setIgnoreKeyboardEvents(true);
+            
+        }
+       
+    }
     public void onStartScreen() {
 //        throw new UnsupportedOperationException("Not supported yet.");
     }
