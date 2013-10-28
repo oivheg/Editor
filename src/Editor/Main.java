@@ -1,6 +1,8 @@
 package Editor;
 
+import Camera.EditorCamera;
 import Game.StartGame;
+import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.KeyInput;
@@ -23,16 +25,17 @@ import de.lessvoid.nifty.elements.render.TextRenderer;
  * test
  * @author normenhansen
  */
-public class Main extends SimpleApplication implements ActionListener {
+public class Main extends SimpleApplication implements ActionListener{
 
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
     }
-
+    
+    
   private Vector3f walkDirection = new Vector3f();
   private StartGame game;
-  private boolean left = false, right = false, up = false, down = false;
+  private boolean left = false, right = false, up = false, down = false, view = false;
  
   //Temporary vectors used on each frame.
   //They here to avoid instanciating new vectors on each frame
@@ -40,9 +43,9 @@ public class Main extends SimpleApplication implements ActionListener {
   private Vector3f camLeft = new Vector3f();
   private Vector3f pos = new Vector3f(0,200,300);
   private Nifty nifty;
-   private String clickedname = "testing";
+  private EditorCamera ECam;
     private int counter;
-    private boolean view;
+    
     @Override
     public void simpleInitApp() {
         startMenu();
@@ -56,10 +59,14 @@ public class Main extends SimpleApplication implements ActionListener {
 
  inputManager.addMapping("click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
  inputManager.addListener(analogListener, "click");
- inputManager.addMapping("view", new KeyTrigger(KeyInput.KEY_Z));
+ inputManager.addMapping("view", new KeyTrigger(KeyInput.KEY_C));
+//  inputManager.addMapping("left", new KeyTrigger(KeyInput.KEY_A));
  inputManager.addListener(this, "view");
+// inputManager.addListener(this,"left");
 
- 
+
+
+  
     }
 private AnalogListener analogListener = new AnalogListener() {
     public void onAnalog(String name, float intensity, float tpf) {
@@ -90,11 +97,9 @@ private AnalogListener analogListener = new AnalogListener() {
           // The closest result is the target that the player picked:
           Geometry target = results.getClosestCollision().getGeometry();
           // Here comes the action:
-          if (target.getName().equals("Box")) {
-            clickedname = target.getName();
-          } else if (target.getName().equals("qube")) {
-              clickedname = target.getName();
-           }
+          game.pickedItem(target);
+          
+          
         }
       } // else if ...
     }
@@ -130,22 +135,18 @@ niftyElement.getRenderer(TextRenderer.class).setText(GetName());
         camDir.set(cam.getDirection()).multLocal(0.6f);
         camLeft.set(cam.getLeft()).multLocal(0.4f);
         walkDirection.set(0, 0, 0);
-//        if (left) {
-//            walkDirection.addLocal(camLeft);
-//        }
-//        if (right) {
-//            walkDirection.addLocal(camLeft.negate());
-//        }
-//        if (up) {
-//            walkDirection.addLocal(camDir);
-//        }
-//        if (down) {
-//            walkDirection.addLocal(camDir.negate());
-//        }
+   
+        int tmp = 0;  
         if (view){
-        game.getPlayer().setWalkDirection(walkDirection);
-        cam.setLocation(game.getPlayer().getPhysicsLocation());
-        flyCam.setDragToRotate(false);
+            
+                game.setVectors(cam.getLocation());
+                  game.getPlayer().setWalkDirection(walkDirection);
+                cam.setLocation(game.getPlayer().getPhysicsLocation());
+                 flyCam.setDragToRotate(false);
+            
+              
+         
+          
         if (!test) {
 //            inputManager.removeListener(this);
         game.setUpKeys();
@@ -158,7 +159,7 @@ niftyElement.getRenderer(TextRenderer.class).setText(GetName());
         }
     boolean test;
      public String GetName() {
-        return clickedname;
+        return game.GetName();
      }
         
         
@@ -168,15 +169,7 @@ niftyElement.getRenderer(TextRenderer.class).setText(GetName());
     }
 
     private void startMenu() {
-        //        
-        //        Box b = new Box(Vector3f.ZERO, 1, 1, 1);
-        //        Geometry geom = new Geometry("Box", b);
-        //
-        //        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        //        mat.setColor("Color", ColorRGBA.Blue);
-        //        geom.setMaterial(mat);
-        //
-        //        rootNode.attachChild(geom);
+       
                 
                 NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(
             assetManager, inputManager, audioRenderer, guiViewPort);
@@ -189,27 +182,51 @@ niftyElement.getRenderer(TextRenderer.class).setText(GetName());
         // attach the Nifty display to the gui view port as a processor
         guiViewPort.addProcessor(niftyDisplay);
         // disable the fly cam
-        flyCam.setDragToRotate(true);
-    }
 
+      
+       
+    }
+private Vector3f cLeft;
+private Vector3f cUp;
     private void setCamera() {
+        flyCam.setEnabled(false);
+        flyCam.unregisterInput();
+        stateManager.detach(stateManager.getState(FlyCamAppState.class));
+        
+        ECam = new EditorCamera(cam);
+        ECam.registerWithInput(inputManager);
+        ECam.setMoveSpeed(100);
+        ECam.setEnabled(true);
+        ECam.setZoomSpeed(100);
+       
         //sets camera start position
+        
         cam.setLocation(pos);
-         Vector3f left = new Vector3f(-0.9996263f,1.0058284E-7f,-0.027339306f);
-         Vector3f up = new Vector3f(0.016700502f, 0.87991315f, -0.47484097f);
-        cam.setAxes(left, up, walkDirection);
+          cLeft = new Vector3f(-0.9996263f,1.0058284E-7f,-0.027339306f);
+//          cUp = new Vector3f(0,0, -1);
+//        cam.setAxes(cLeft, cUp, walkDirection);
+//        cam.lookAtDirection(new Vector3f (0,0,-1), cUp);
+          
+           cam.setLocation(new Vector3f(0, 10, 100));
+        cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
+        cam.update();
     }
 
     public void onAction(String binding, boolean isPressed, float tpf) {
-        if (binding.equals("view")) {
-//     
-       
+        if (binding.equals("view")) {   
         view = true;   
-      
-    
-    }
+        }
+        if (binding.equals("left")){
+            left = true;
+        }
 
     }
+
+ 
+    
+  
+
+   
 
     
 }
