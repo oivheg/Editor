@@ -4,10 +4,8 @@
  */
 package Screens;
 
-import Editor.Main;
 import com.jme3.app.state.AbstractAppState;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.controls.textfield.TextFieldControl;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
