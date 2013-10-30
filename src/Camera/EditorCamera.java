@@ -38,6 +38,7 @@ public class EditorCamera extends FlyByCamera implements ActionListener{
     
     public EditorCamera (Camera cam) {
         super(cam);
+        dragToRotate = true;
     }
    private boolean useArrowKeys = true;
       public EditorCamera (Camera cam, boolean useArrowKeys) {
@@ -55,27 +56,31 @@ public class EditorCamera extends FlyByCamera implements ActionListener{
         inputManager.addMapping("Editor_Forward", new KeyTrigger(KeyInput.KEY_W));
         inputManager.addMapping("Editor_Back", new KeyTrigger(KeyInput.KEY_S));
 
-     // mouse only - zoom in/out with wheel, and rotate drag
+     // mouse only - zoom in/out with wheel
         inputManager.addMapping("Editor_ScrollIn", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
         inputManager.addMapping("Editor_ScrollOut", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
-        //inputManager.addMapping("Editor_RotateDrag", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        
+       
         
      // Raise and lower camera
         inputManager.addMapping("Editor_Rise", new KeyTrigger(KeyInput.KEY_Q));
         inputManager.addMapping("Editor_Lower", new KeyTrigger(KeyInput.KEY_Z));
-     // Rotate camere
-        inputManager.addMapping("Editor_RLeft", new KeyTrigger(KeyInput.KEY_LEFT));
-        inputManager.addMapping("Editor_RRight", new KeyTrigger(KeyInput.KEY_RIGHT));
-        inputManager.addMapping("Editor_RUp", new KeyTrigger(KeyInput.KEY_UP));
-        inputManager.addMapping("Editor_RDown", new KeyTrigger(KeyInput.KEY_DOWN));
-        
-        
+     // Rotate camera
+        inputManager.addMapping("Editor_RLeft", new KeyTrigger(KeyInput.KEY_LEFT),new MouseAxisTrigger(MouseInput.AXIS_X, true));
+        inputManager.addMapping("Editor_RRight", new KeyTrigger(KeyInput.KEY_RIGHT),new MouseAxisTrigger(MouseInput.AXIS_X, false));
+        inputManager.addMapping("Editor_RUp", new KeyTrigger(KeyInput.KEY_UP), new MouseAxisTrigger(MouseInput.AXIS_Y, false));
+        inputManager.addMapping("Editor_RDown", new KeyTrigger(KeyInput.KEY_DOWN), new MouseAxisTrigger(MouseInput.AXIS_Y, true));
+        //with scrollwheel and mouse movement        
+         inputManager.addMapping("Editor_Rotate", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+         
+        //adding listeners
         inputManager.addListener(this, actions);
         inputManager.setCursorVisible(true);
+        
       }
     
    
-   
+   int counter = 0;
     @Override
       public void onAnalog(String name, float value, float tpf) {
         if (name.equals("Editor_Left")) {
@@ -94,7 +99,12 @@ public class EditorCamera extends FlyByCamera implements ActionListener{
             moveCamera(-value, true);
     }else if (name.equals("Editor_Rise")){
             riseCamera(value);
-    }else if (name.equals("Editor_RLeft")){
+    } else if (name.equals("Editor_Lower")){
+            riseCamera(-value);
+    }else 
+        
+        
+    if (name.equals("Editor_RLeft")){
             rotateCamera(value, initialUpVec);
     }else if (name.equals("Editor_RRight")){
             rotateCamera(-value, initialUpVec);
@@ -102,7 +112,21 @@ public class EditorCamera extends FlyByCamera implements ActionListener{
             rotateCamera(-value * (invertY ? -1 : 1), cam.getLeft());
     }else if (name.equals("Editor_RDown")){
             rotateCamera(value * (invertY ? -1 : 1), cam.getLeft());
+    }if (name.equals("Editor_Rotate")){
+        
     }
     }
 
+ 
+    @Override
+    public void onAction(String binding, boolean value, float tpf) {
+    if (binding.equals("Editor_Rotate")) {
+        if (value) { canRotate = true;
+         inputManager.setCursorVisible(false);
+        } else { canRotate = false;
+         inputManager.setCursorVisible(true);
+        }
+    
+    }
+    }
 }
