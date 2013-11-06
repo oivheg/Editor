@@ -37,12 +37,24 @@ public class Hud extends AbstractAppState implements ScreenController {
         if (field.isIgnoreKeyboardEvents()) {
            field.setIgnoreKeyboardEvents(false);
            field.setFocus();
-           
+
        }else {
             field.setIgnoreKeyboardEvents(true);
-            
+
         }
        
+    }
+    public boolean isDay() {
+        return isDay;
+    }
+    boolean isDay = false;
+    public void changeDay(){
+         if(isDay){
+             isDay = false;
+         }else {
+             isDay = true;
+         }
+        
     }
     public void onStartScreen() {
 //        throw new UnsupportedOperationException("Not supported yet.");
