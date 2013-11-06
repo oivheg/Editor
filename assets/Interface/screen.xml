@@ -50,18 +50,21 @@
              >  
             <control id="name" name="label" color="#000" text="the  HUD's Cool Game" width="100%" height="100%" backgroundColor="#00f8" />
         </panel>
-        <panel id="panel_top_right2" width="100%" height="15%" childLayout="center"
+        <panel id="panel_top_right2" width="100%" height="15%" childLayout="vertical"
              backgroundColor="#44f8"> 
-            <layout>
+           
             <control  id="x" name="textfield" color="#000" text="x coord"  backgroundColor="#00f8"> <interact onClick="test()"/> </control>
             <control  id="y" name="textfield" color="#000" text="y coord"  backgroundColor="#00f8"> <interact onClick="test()"/> </control>
             <control  id="z" name="textfield" color="#000" text="z coord"  backgroundColor="#00f8"> <interact onClick="test()"/> </control>
-            
-            </layout>
+           
+        
            
         </panel>
-        <panel id="panel_bot_right" width="100%" height="70%" valign="center"
+        <panel id="panel_bot_right" width="100%" height="70%" childLayout="center"
              backgroundColor="#88f8">  
+            <control name="button" label="Night" id="DayNight" align="center" valign="center"><interact onClick="changeDay()"/> </control>
+            
+           
             
         </panel>
       </panel>
