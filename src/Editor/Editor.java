@@ -17,6 +17,7 @@ import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 
@@ -40,6 +41,7 @@ public class Editor extends SimpleApplication implements ActionListener{
   private Nifty nifty;
   private EditorCamera ECam;
     private int counter;
+    private float x,y,z = 0;
     
     @Override
     public void simpleInitApp() {
@@ -102,7 +104,10 @@ private AnalogListener analogListener = new AnalogListener() {
                 Geometry target = results.getClosestCollision().getGeometry();
                 // Here comes the action:
                 game.pickedItem(target);
-                
+                target.setLocalScale(x, y, z);
+//                x = target.getLocalScale().x;
+                y = target.getLocalScale().y;
+                z = target.getLocalScale().z;
                 
               }
             }
@@ -125,11 +130,25 @@ private AnalogListener analogListener = new AnalogListener() {
         if (nifty != null && "hud".equals(nifty.getCurrentScreen().getScreenId()) ) {
       // find old text
 Element Label = nifty.getCurrentScreen().findElementByName("name");
+TextField Fieldx = nifty.getCurrentScreen().findNiftyControl("x", TextField.class);
+TextField Fieldy = nifty.getCurrentScreen().findNiftyControl("y", TextField.class);
+TextField Fieldz = nifty.getCurrentScreen().findNiftyControl("z", TextField.class);
 Element Button = nifty.getCurrentScreen().findElementByName("Button_ID");
+
 // swap old with new text
-if (Label != null && Button !=null) {
+if (Label != null ) {
 Label.getRenderer(TextRenderer.class).setText(GetName());
-   
+if(!Fieldx.getDisplayedText().equals(x+"")){
+    
+   Fieldx.setText(x+"");
+   Fieldy.setText(y+"");
+   Fieldz.setText(z+"");
+
+}else{
+    x =  Float.parseFloat(Fieldx.getDisplayedText());
+    y =  Float.parseFloat(Fieldy.getDisplayedText());
+    z =  Float.parseFloat(Fieldz.getDisplayedText());
+}
 }        
 } 
     }  
@@ -230,6 +249,7 @@ private Vector3f cUp;
 
  
     public void changeDay(){
+        
         game.changeDay();
         
     }
