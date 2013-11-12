@@ -16,6 +16,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
+import com.jme3.terrain.geomipmap.TerrainPatch;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.elements.Element;
@@ -42,7 +43,7 @@ public class Editor extends SimpleApplication implements ActionListener{
   private EditorCamera ECam;
     private int counter;
     private float x,y,z = 0;
-    
+    private Geometry target;
     @Override
     public void simpleInitApp() {
         startMenu();
@@ -68,11 +69,11 @@ public class Editor extends SimpleApplication implements ActionListener{
   
     }
     
-     
+    boolean hasPicked; 
 private AnalogListener analogListener = new AnalogListener() {
     public void onAnalog(String name, float intensity, float tpf) {
             PickItem(name);
-            
+         
     }
 
         private void PickItem(String name) {
@@ -101,14 +102,25 @@ private AnalogListener analogListener = new AnalogListener() {
               // Use the results -- we rotate the selected geometry.
               if (results.size() > 0) {
                 // The closest result is the target that the player picked:
-                Geometry target = results.getClosestCollision().getGeometry();
+                 target = results.getClosestCollision().getGeometry();
                 // Here comes the action:
                 game.pickedItem(target);
-                target.setLocalScale(x, y, z);
-//                x = target.getLocalScale().x;
+               if(!(target instanceof TerrainPatch)){
+                x = target.getLocalScale().x;
                 y = target.getLocalScale().y;
-                z = target.getLocalScale().z;
-                
+                z = target.getLocalScale().z; 
+                hasPicked = true;
+               }else {
+                   x = -1;
+                   y = -1;
+                   z = -1;
+                   hasPicked = false;
+               }
+              
+                  
+               
+               
+                 //target.setLocalScale(x, y, z);
               }
             }
         }
@@ -138,17 +150,36 @@ Element Button = nifty.getCurrentScreen().findElementByName("Button_ID");
 // swap old with new text
 if (Label != null ) {
 Label.getRenderer(TextRenderer.class).setText(GetName());
-if(!Fieldx.getDisplayedText().equals(x+"")){
-    
+
+
+  
+   if (hasPicked){
    Fieldx.setText(x+"");
    Fieldy.setText(y+"");
    Fieldz.setText(z+"");
+   hasPicked = false;
+   }else {
+         try {
+           x = Float.parseFloat(Fieldx.getDisplayedText());
+           y = Float.parseFloat(Fieldy.getDisplayedText());
+           z = Float.parseFloat(Fieldz.getDisplayedText());
+           if(!(target instanceof TerrainPatch)){
+                target.setLocalScale(x, y, z);
+           }
+           
+     }catch(NumberFormatException nfe){
+         //eror 
+     }
+        
+   }
+   
+  
+  
+//   
+      
+   
 
-}else{
-    x =  Float.parseFloat(Fieldx.getDisplayedText());
-    y =  Float.parseFloat(Fieldy.getDisplayedText());
-    z =  Float.parseFloat(Fieldz.getDisplayedText());
-}
+
 }        
 } 
     }  
@@ -161,7 +192,7 @@ if(!Fieldx.getDisplayedText().equals(x+"")){
    
         int tmp = 0;  
         if (view){
-            // denne koden må fikses.
+           
       ECam.setEnabled(false);
     
                 game.setVectors(cam.getLocation());
