@@ -9,7 +9,10 @@ import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.light.AmbientLight;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -21,6 +24,9 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 
 public class Editor extends SimpleApplication implements ActionListener{
@@ -43,7 +49,7 @@ public class Editor extends SimpleApplication implements ActionListener{
   private EditorCamera ECam;
     private int counter;
     private float x,y,z = 0;
-    private Geometry target;
+    private Geometry pickedGeometry;
     @Override
     public void simpleInitApp() {
         startMenu();
@@ -56,7 +62,18 @@ public class Editor extends SimpleApplication implements ActionListener{
  rootNode.attachChild(game.getRoot());
 
  inputManager.addMapping("click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+ inputManager.addMapping("mLeft", new MouseAxisTrigger(MouseInput.AXIS_X, false));
+ inputManager.addMapping("mRight", new MouseAxisTrigger(MouseInput.AXIS_X, true));
+  inputManager.addMapping("mUp", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
+ inputManager.addMapping("mDown", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
+ 
+ 
  inputManager.addListener(analogListener, "click");
+ inputManager.addListener(analogListener, "mLeft");
+ inputManager.addListener(analogListener, "mRight");
+  inputManager.addListener(analogListener, "mUp");
+   inputManager.addListener(analogListener, "mDown");
+ 
  inputManager.addMapping("view", new KeyTrigger(KeyInput.KEY_C));
 //  inputManager.addMapping("left", new KeyTrigger(KeyInput.KEY_A));
  inputManager.addListener(this, "view");
@@ -69,15 +86,43 @@ public class Editor extends SimpleApplication implements ActionListener{
   
     }
     
-    boolean hasPicked; 
+    boolean hasPicked = false;; 
 private AnalogListener analogListener = new AnalogListener() {
     public void onAnalog(String name, float intensity, float tpf) {
+       if (name.equals("click")) {
             PickItem(name);
+          
+       }
+       if(pickedGeometry != null && hasPicked){
+            if(name.equals("mLeft")){
+        
+           mouseDragged("left", tpf);
+         
+        }
+        if(name.equals("mRight")){
+            
+               mouseDragged("right", tpf);
+               
+           }
+        if(name.equals("mUp")){
+            
+               mouseDragged("back", tpf);
+               
+           }
+        if(name.equals("mDown")){
+            
+               mouseDragged("forward", tpf);
+               
+           }
+       }
+       
+       
+           
          
     }
 
         private void PickItem(String name) {
-            if (name.equals("click")) {
+            
               // Reset results list.
               CollisionResults results = new CollisionResults();
               // Convert screen click to 3d position
@@ -102,30 +147,41 @@ private AnalogListener analogListener = new AnalogListener() {
               // Use the results -- we rotate the selected geometry.
               if (results.size() > 0) {
                 // The closest result is the target that the player picked:
-                 target = results.getClosestCollision().getGeometry();
+               Geometry  target = results.getClosestCollision().getGeometry();
+              
                 // Here comes the action:
-                game.pickedItem(target);
+                
                if(!(target instanceof TerrainPatch)){
+                   
                 x = target.getLocalScale().x;
                 y = target.getLocalScale().y;
                 z = target.getLocalScale().z; 
                 hasPicked = true;
+                pickedGeometry = target;
+                 
+                
+                
+                //game.pickedItem(pickedGeometry);
+                 
+               
                }else {
+                   
                    x = -1;
                    y = -1;
                    z = -1;
                    hasPicked = false;
                }
               
-                  
-               
+                 
+                 
+                
                
                  //target.setLocalScale(x, y, z);
               }
             }
-        }
+        
   };
-
+float last = 0;
     @Override
     public void simpleUpdate(float tpf) {
         if (game != null) {
@@ -157,14 +213,15 @@ Label.getRenderer(TextRenderer.class).setText(GetName());
    Fieldx.setText(x+"");
    Fieldy.setText(y+"");
    Fieldz.setText(z+"");
-   hasPicked = false;
+   
    }else {
          try {
            x = Float.parseFloat(Fieldx.getDisplayedText());
            y = Float.parseFloat(Fieldy.getDisplayedText());
            z = Float.parseFloat(Fieldz.getDisplayedText());
-           if(!(target instanceof TerrainPatch)){
-                target.setLocalScale(x, y, z);
+           if(!(pickedGeometry instanceof TerrainPatch)){
+                pickedGeometry.setLocalScale(x, y, z);
+              
            }
            
      }catch(NumberFormatException nfe){
@@ -200,9 +257,6 @@ Label.getRenderer(TextRenderer.class).setText(GetName());
                 cam.setLocation(game.getPlayer().getPhysicsLocation());
                  flyCam.setDragToRotate(false);
             
-              
-         
-          
         if (!test) {
 //            inputManager.removeListener(this);
         game.setUpKeys();
@@ -215,7 +269,10 @@ Label.getRenderer(TextRenderer.class).setText(GetName());
         }
     boolean test;
      public String GetName() {
-        return game.GetName();
+         if (pickedGeometry == null) {
+              return null;
+         }
+       return pickedGeometry.getName();
      }
         
         
@@ -284,7 +341,27 @@ private Vector3f cUp;
         game.changeDay();
         
     }
-  
+float lastx;
+    public void mouseDragged(String direction, float tpf) {
+         float posx = pickedGeometry.getLocalTranslation().x;
+           float posy = pickedGeometry.getLocalTranslation().y;
+           float posz = pickedGeometry.getLocalTranslation().z;
+        if (direction.equals("left")){
+          posx += 1.5;
+        } else if (direction.equals("right")){
+            posx -= 1.5;
+        } else if (direction.equals("back")){
+            posz += 2;
+        }else if (direction.equals("forward")){
+            posz -= 2;
+        }
+          pickedGeometry.setLocalTranslation(posx, posy, posz);
+        lastx = inputManager.getCursorPosition().x;
+        
+    }
+
+
+
 
    
 
