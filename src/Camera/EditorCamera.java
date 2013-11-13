@@ -101,10 +101,7 @@ public class EditorCamera extends FlyByCamera implements ActionListener{
             riseCamera(value);
     } else if (name.equals("Editor_Lower")){
             riseCamera(-value);
-    }else 
-        
-        
-    if (name.equals("Editor_RLeft")){
+    }else if (name.equals("Editor_RLeft")){
             rotateCamera(value, initialUpVec);
     }else if (name.equals("Editor_RRight")){
             rotateCamera(-value, initialUpVec);
@@ -113,7 +110,7 @@ public class EditorCamera extends FlyByCamera implements ActionListener{
     }else if (name.equals("Editor_RDown")){
             rotateCamera(value * (invertY ? -1 : 1), cam.getLeft());
     }if (name.equals("Editor_Rotate")){
-        
+     // does not do anything
     }
     }
 
