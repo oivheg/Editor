@@ -3,6 +3,7 @@ package Editor;
 import Camera.EditorCamera;
 import Game.StartGame;
 import com.jme3.app.SimpleApplication;
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.KeyInput;
@@ -22,6 +23,7 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.terrain.geomipmap.TerrainPatch;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.controls.Button;
 import de.lessvoid.nifty.controls.CheckBox;
 import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.elements.Element;
@@ -59,13 +61,16 @@ public class Editor extends SimpleApplication implements ActionListener {
         game = new StartGame();
         game.init(assetManager, stateManager, viewPort, flyCam, inputManager, cam);
         rootNode.attachChild(game.getRoot());
-
+ 
+        
         inputManager.addMapping("click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addMapping("mLeft", new MouseAxisTrigger(MouseInput.AXIS_X, false));
         inputManager.addMapping("mRight", new MouseAxisTrigger(MouseInput.AXIS_X, true));
         inputManager.addMapping("mUp", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
         inputManager.addMapping("mDown", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
         inputManager.addMapping("ctrl", new KeyTrigger(KeyInput.KEY_LCONTROL));
+        inputManager.addMapping("view", new KeyTrigger(KeyInput.KEY_C));
+        inputManager.addMapping("light", new KeyTrigger(KeyInput.KEY_L));
 
         inputManager.addListener(this, "click");
         inputManager.addListener(this, "ctrl");
@@ -73,17 +78,8 @@ public class Editor extends SimpleApplication implements ActionListener {
         inputManager.addListener(analogListener, "mRight");
         inputManager.addListener(analogListener, "mUp");
         inputManager.addListener(analogListener, "mDown");
-
-        inputManager.addMapping("view", new KeyTrigger(KeyInput.KEY_C));
-
         inputManager.addListener(this, "view");
-
-        inputManager.addMapping("light", new KeyTrigger(KeyInput.KEY_L));
         inputManager.addListener(this, "light");
-
-
-
-
     }
     boolean hasPicked = false;
     ;
@@ -92,19 +88,13 @@ public class Editor extends SimpleApplication implements ActionListener {
 private AnalogListener analogListener = new AnalogListener() {
         public void onAnalog(String name, float intensity, float tpf) {
 
-
-
             if (pickedGeometry != null && clicked) {
-
                 if (name.equals("mLeft")) {
-
                     mouseDragged("left", tpf);
-
                 }
                 if (name.equals("mRight")) {
 
                     mouseDragged("right", tpf);
-
                 }
                 if (name.equals("mUp")) {
                     if (ctrl) {
@@ -112,8 +102,6 @@ private AnalogListener analogListener = new AnalogListener() {
                     } else {
                         mouseDragged("back", tpf);
                     }
-
-
                 }
                 if (name.equals("mDown")) {
                     if (ctrl) {
@@ -121,15 +109,8 @@ private AnalogListener analogListener = new AnalogListener() {
                     } else {
                         mouseDragged("forward", tpf);
                     }
-
-
                 }
-
             }
-
-
-            hasPicked = false;
-
         }
     };
 
@@ -144,7 +125,7 @@ private AnalogListener analogListener = new AnalogListener() {
 
         // Aim the ray from the clicked spot forwards.
         Ray ray = new Ray(click3d, dir);
-//              Vector3f newPos = ray.getDirection();
+        //Vector3f newPos = ray.getDirection();
         // Collect intersections between ray and all nodes in results list.
         rootNode.collideWith(ray, results);
         // (Print the results so we see what is going on:)
@@ -161,88 +142,80 @@ private AnalogListener analogListener = new AnalogListener() {
             // The closest result is the target that the player picked:
             Geometry target = results.getClosestCollision().getGeometry();
 
-            // Here comes the action:
 
+// if not terrain, prevents user from selecting terrain.
             if (!(target instanceof TerrainPatch)) {
 
                 x = target.getLocalScale().x;
                 y = target.getLocalScale().y;
                 z = target.getLocalScale().z;
-//                hasPicked = true;
+
                 pickedGeometry = target;
-
                 nameofPickedItem = pickedGeometry.getName();
-
-
             } else {
-
+// default values, if nothing is picked
                 nameofPickedItem = "None Selected";
                 pickedGeometry = null;
-
                 x = -1;
                 y = -1;
                 z = -1;
-//                   hasPicked = false;
             }
-
-            //target.setLocalScale(x, y, z);
+            //check if Geometry has Gravity ( RigidBodyControl. Kinematic = false)
             checkKinematic();
-
+            // if has, Kinematic is turned on, so object can be moved
             if (hasKinematic) {
-
-                  
                 pickedGeometry.getControl(RigidBodyControl.class).setKinematic(clicked);
             }
         }
     }
-   
-
+boolean istrue;
     @Override
     public void simpleUpdate(float tpf) {
         if (game != null) {
-
+ 
             updatePos(tpf);
+            if (istrue){
+                 game.update(tpf);
+            }
+           
         }
         // this updates the label field in the hud to match what item is clicked ( will be selectet at a later point)
         if (nifty != null && "hud".equals(nifty.getCurrentScreen().getScreenId())) {
+           
             // find old text
             Element Label = nifty.getCurrentScreen().findElementByName("name");
             TextField Fieldx = nifty.getCurrentScreen().findNiftyControl("x", TextField.class);
             TextField Fieldy = nifty.getCurrentScreen().findNiftyControl("y", TextField.class);
             TextField Fieldz = nifty.getCurrentScreen().findNiftyControl("z", TextField.class);
-            Element Button = nifty.getCurrentScreen().findElementByName("Button_ID");
+           Button Button = nifty.getCurrentScreen().findNiftyControl("DayNight", Button.class);
             CheckBox Gravity = nifty.getCurrentScreen().findNiftyControl("gravity", CheckBox.class);
-
-
-            // swap old with new text
+            // change data in nifty
+           
+            if (Button.hasFocus()){
+               
+            }
+            
             if (Label != null) {
                 Label.getRenderer(TextRenderer.class).setText(getName());
-
-
-
                 if (clicked) {
                     Fieldx.setText(x + "");
                     Fieldy.setText(y + "");
                     Fieldz.setText(z + "");
-                    
+
                     Gravity.setEnabled(hasKinematic);
                     if (isChecked) {
 
                         Gravity.setChecked(isChecked);
                     } else {
                         Gravity.setChecked(isChecked);
-}
-
-
-
+                    }
                 } else {
-                    
-                    if (Gravity.isChecked()){
+
+                    if (Gravity.isChecked()) {
                         isChecked = true;
-                    }else {
+                    } else {
                         isChecked = false;
                     }
-//                    
                     setKinematic(isChecked);
                     try {
                         x = Float.parseFloat(Fieldx.getDisplayedText());
@@ -251,12 +224,14 @@ private AnalogListener analogListener = new AnalogListener() {
                         if (!(pickedGeometry instanceof TerrainPatch) && pickedGeometry != null) {
                             pickedGeometry.setLocalScale(x, y, z);
 
-                        }
+                            CollisionShape tmp = pickedGeometry.getControl(RigidBodyControl.class).getCollisionShape();
+                            tmp.setScale(new Vector3f(x, y, z));
+                            pickedGeometry.getControl(RigidBodyControl.class).setCollisionShape(tmp);
 
+
+                        }
                     } catch (NumberFormatException nfe) {
                     }
-
-
                 }
             }
         }
@@ -284,6 +259,7 @@ private AnalogListener analogListener = new AnalogListener() {
                 test = true;
                 view = false;
             } else {
+               
                 game.updatePos(tpf);
             }
         }
@@ -302,19 +278,10 @@ private AnalogListener analogListener = new AnalogListener() {
     private void startMenu() {
         NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(
                 assetManager, inputManager, audioRenderer, guiViewPort);
-        /**
-         * Create a new NiftyGUI object
-         */
         nifty = niftyDisplay.getNifty();
-
-        /**
-         * Read your XML and initialize your custom ScreenController
-         */
         nifty.fromXml("Interface/screen.xml", "start");
-        // nifty.fromXml("Interface/helloworld.xml", "start", new MySettingsScreen(data));
-        // attach the Nifty display to the gui view port as a processor
+        // attach the Nifty display to the gui view port 
         guiViewPort.addProcessor(niftyDisplay);
-        // disable the fly cam
     }
 
     private void setCamera() {
@@ -347,7 +314,8 @@ private AnalogListener analogListener = new AnalogListener() {
             } else {
 
                 clicked = false;
-                if (hasKinematic) { pickedGeometry.getControl(RigidBodyControl.class).setKinematic(clicked);
+                if (hasKinematic) {
+                    pickedGeometry.getControl(RigidBodyControl.class).setKinematic(clicked);
                 }
             }
         }
@@ -363,13 +331,18 @@ private AnalogListener analogListener = new AnalogListener() {
             view = true;
         }
         if (binding.equals("light")) {
-            game.sunDir();
+//            game.sunDir();
+             Vector3f geoPos = pickedGeometry.getWorldTranslation();
+                game.setEndPos(geoPos);
+            game.runcollector(tpf);
+            istrue = true;
 //            changeDay();
         }
     }
 
     public void changeDay() {
         game.changeDay();
+       
     }
 
     public void mouseDragged(String direction, float tpf) {
